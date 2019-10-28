@@ -11,3 +11,9 @@ docker build -t clientname .
 
 Running client:
 docker run -p8080:80 clientname
+
+
+Verification:
+Name and Surname - first letter must be BIG
+Login - 3 to 12 small letters long
+Password - at least 8 letters long
