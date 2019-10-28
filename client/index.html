@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <div id="register">
+        <div class="inputs">
+            <form action="#" method="post">
+                <h1>Sign Up</h1>
+                <input type="text" id="name" name="name" placeholder="Name">
+                <input type="text" id="surname" name="surname" placeholder="Surname">
+                <p>
+                    <input type="text" id="username" name="username" placeholder="Username [a-z] 3-12">
+                    <span id="span3">username is already taken</span>
+                </p>
+                <input type="email" id="email" name="email" placeholder="E-mail" spellcheck>
+                <p>
+                    <input type="password" id="password" name="password" placeholder="Password [A-Za-z]">
+                    <span id="span1">Enter a password longer than 7 characters</span>
+                </p>
+                <p>
+                    <input type="password" id="password2" name="password2" placeholder="Confirm Password ">
+                    <span id="span2">Your passwords do not match</span>
+                </p>
+                <button type="button" name="submit" id="submit">Sign me up</button>
+            </form>
+        </div>
+    </div>
+</head>
+<body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="verification.js"></script>
+</body>
+</html>

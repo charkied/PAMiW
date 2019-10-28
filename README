@@ -1,0 +1,13 @@
+Create server image:
+while in /register directory
+docker build -t servername .
+
+Running server:
+docker run -p5000:5000 servername
+
+Running client image:
+while in /client directory
+docker build -t clientname .
+
+Running client:
+docker run -p8080:80 clientname
