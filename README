@@ -1,6 +1,6 @@
 docker-compose up
 
-localgost:8080
+localhost:8080
 
 
 Verification:
