@@ -103,7 +103,8 @@ $("#submit").click(function () {
         dataType: 'json',
         async: false,
         success: function() {
-            alert("Signed Up Succesfully");
+            window.location.href = "http://localhost:8080/login.html";
+            alert("Signed Up Successfully");
         },
         error: function () {
             alert("Mistakes were made");

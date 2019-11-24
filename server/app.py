@@ -2,12 +2,28 @@ import json
 import pickle
 import re
 
-from flask import Flask, make_response, request
+from flask import Flask, make_response, request, jsonify, redirect, send_file
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_raw_jwt, get_jwt_identity
 
 users = {}
 app = Flask(__name__)
+
+app.config['JWT_SECRET_KEY'] = 'PaMiW'
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 360
+jwt = JWTManager(app)
+
 CORS(app)
+
+blacklist = set()
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return jti in blacklist
 
 
 @app.route('/')
@@ -20,10 +36,6 @@ def index():
   <li><a href='/register'>The endpoint for user registration</a> works with POST method</li>
   </ul>
   ''', 200
-
-
-if __name__ == '__main__':
-    app.run()
 
 
 @app.route('/user/<username>', methods=['GET', 'OPTIONS', 'HEAD'])
@@ -55,8 +67,7 @@ def register():
             errors.append("Field '" + field + "' is invalid: " + requirements(field))
         else:
             user[field] = data[field]
-            print(field)
-
+    print(users)
     login = user.get('login')
     if login in users:
         errors.append("User '{}' already registered".format(login))
@@ -68,6 +79,63 @@ def register():
     save_users()
     return json.dumps(user), 201
 
+
+@app.route('/login', methods=['POST'])
+def login():
+    response = make_response('', 404)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    errors = []
+    user = {}
+    data = request.get_json()
+    fields = ('login', 'password')
+    for field in fields:
+        if field not in data:
+            errors.append("No '" + field + "' in data")
+        else:
+            user[field] = data[field]
+    login = user.get('login')
+    if login not in users:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    if login is None or len(errors) > 0:
+        return "<ul><li>" + "</li>\n<li>".join(errors) + "</li></ul>", 400
+
+    if users[login].get('password') == user.get('password'):
+        ret = {
+            'access_token': create_access_token(identity=login)
+        }
+        return jsonify(ret), 200
+    return jsonify({"msg": "Bad username or password"}), 401
+
+
+@app.route('/logout', methods=['DELETE'])
+@jwt_required
+def logout():
+    jti = get_raw_jwt()['jti']
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
+
+
+@app.route('/upload', methods=["POST"])
+@jwt_required
+def upload():
+    data = request.get_data()
+    # data = request.get_json()
+    file = open(get_jwt_identity() + ".pdf", 'wb')
+    file.write(data)
+    file.close()
+    return jsonify("thats all folks")
+
+
+@app.route('/download', methods=["GET"])
+@jwt_required
+def download():
+    filename = get_jwt_identity() + '.pdf'
+    try:
+        return send_file(filename_or_fp=filename, mimetype='application/pdf')
+    except FileNotFoundError:
+        return 404
 
 PL = 'ĄĆĘŁŃÓŚŹŻ'
 pl = 'ąćęłńóśźż'
@@ -111,3 +179,6 @@ def requirements(field):
 
     return '(no requirements)'
 
+
+if __name__ == '__main__':
+    app.run()
